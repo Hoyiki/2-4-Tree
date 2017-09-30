@@ -144,11 +144,13 @@ public:
 
         if (i<=n && k==keys[i]){
             TreeNode *currentNode = this;
-            while (not currentNode -> isLeaf){
+            if (not currentNode -> isLeaf){
+                while (not currentNode -> isLeaf){
+                    i = currentNode -> n;
+                    currentNode = currentNode -> childs[i];
+                }
                 i = currentNode -> n;
-                currentNode = currentNode -> childs[i];
             }
-            i = currentNode -> n;
             searchReturn find = {currentNode, i};
             return find;
         }
@@ -235,7 +237,7 @@ public:
                 s -> keys[0] = root -> keys[3];
                 root = s;
                 root -> split(0);
-                if (k > root -> keys[0]){
+                if (k > root -> keys[1]){
                     root -> insertMax(k);
                 }
                 else{
@@ -293,9 +295,17 @@ public:
                 currentI = 0;
             }
             //printing students in treenode that contains b
-            for (int i = 0; i <= sb.i; i++){
-                cout << "printing information about student " << currentX -> keys[i] << endl;
-                currentX -> records[i] -> printRecord();
+            if (sa.x == sb.x){
+                for (int i = sa.i; i <= sb.i; i++){
+                    cout << "printing information about student " << currentX -> keys[i] << endl;
+                    currentX -> records[i] -> printRecord();
+                }
+            }
+            else{
+                for (int i = 0; i <= sb.i; i++){
+                    cout << "printing information about student " << currentX -> keys[i] << endl;
+                    currentX -> records[i] -> printRecord();
+                }
             }
         }
     }
@@ -312,16 +322,16 @@ int main(){
     tft -> insert(40, "cs111", "computerOh","A+");
     tft -> insert(50, "cs1", "computerAh","A+");
     tft -> insert(90, "cs121", "computerOh","A+");
-    tft -> insert(31, "cs14", "computerAh","A+");
-//    tft -> insert(41, "cs1", "computerOh","A+");
-//    tft -> insert(51, "cs10", "computerAh","A+");
-//    tft -> insert(31, "cs1", "computerOh","A+");
-//    tft -> insert(31, "cs10", "computerAh","A+");
-//    tft -> insert(41, "cs3", "computerOh","A+");
-//    tft -> insert(51, "cs60", "computerAh","A+");
+    tft -> insert(31, "cs14", "computerAh","A+"); //something went wrong here about the records!!!
+    tft -> insert(41, "cs1", "computerOh","A+");
+    tft -> insert(51, "cs10", "computerAh","A+");
+    tft -> insert(31, "cs1", "computerOh","A+");
+    tft -> insert(31, "cs10", "computerAh","A+");
+    tft -> insert(41, "cs3", "computerOh","A+");
+    tft -> insert(51, "cs60", "computerAh","A+");
     tft -> printTree();
 //    tft -> printLeaves();
-    tft -> findRange(30, 90);
+    tft -> findRange(90, 90);
 }
 
 
