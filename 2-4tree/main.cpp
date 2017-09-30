@@ -3,14 +3,16 @@
 #include <list>
 #include <algorithm>
 #include <sstream>
+#include <string>
+#include <map>
 using namespace std;
 
 string grades[13] = {"A", "B", "C", "D","A+", "B+", "C+", "D+", "A-", "B-", "C-", "D-","NP"};
 float points[13]= {4, 3, 2, 1, 4.3, 3.3, 2.3, 1.3, 3.7, 2.7, 1.7, 0.7, 0};
 struct courseRecord{
-    char *courseID;
-    char *courseName;
-    char *grade;
+    string courseID;
+    string courseName;
+    string grade;
 };
 
 class studentRecord{
@@ -26,7 +28,7 @@ public:
         int courseNumber = courseList -> size();
         float gpa = 0;
         for (courseRecord* r : *courseList){
-            char* grade = r -> grade;
+            string grade = r -> grade;
             int index = distance(grades, find(grades, grades + 13, grade));
             if (index < 0 or index > 12){
                 index = 12;
@@ -35,7 +37,7 @@ public:
         }
         return gpa;
     }
-    void deleteCourse(char* cID){
+    void deleteCourse(string cID){
         list<courseRecord*>::iterator it;
         it = courseList -> begin();
         if ((*it) != NULL){
@@ -44,7 +46,6 @@ public:
             while ((*it)->courseID != cID and cc < courseNumber){
                 ++it;
                 cc ++;
-                cout << "yo\n";
             }
             if ((*it)->courseID == cID){
                 courseList -> erase(it);
@@ -260,7 +261,7 @@ public:
         currentNode -> printNode();
     }
     
-    void insert(int k, char* courseID, char* courseName, char* grade){
+    void insert(int k, string courseID, string courseName, string grade){
         TreeNode::searchReturn s = root -> search(k);
         courseRecord *r = new courseRecord;
         *r = {courseID, courseName, grade};
@@ -312,7 +313,7 @@ public:
         }
     }
     
-    void del(int k, char* cID){
+    void del(int k, string cID){
         TreeNode::searchReturn s = root -> search(k);
         if (s.x == NULL){
             cout << "this student is not in the database\n";
@@ -325,13 +326,12 @@ public:
     
     void gpaOne (int k){
         TreeNode::searchReturn s = root -> search(k);
-        cout << "gpa of student "<< k << endl;
         if (s.x == NULL){
             cout << "this student is not in the database\n";
         }
         else{
             studentRecord *r = s.x -> records[s.i];
-            cout << "gpa: "<< r->getGPA()<< endl;
+            cout << "gpa of student "<< k << " is "<< r->getGPA()<< endl;
         }
     }
     
@@ -373,7 +373,7 @@ public:
                 }
             }
             float averageGPA = totalGPA / studentNumber;
-            cout << "the average gpa in the range from" << a <<"to "<<b<<" is "<<averageGPA<<endl;
+            cout << "the average gpa in the range from " << a <<" to "<<b<<" is "<<averageGPA<<endl;
         }
     }
     void findRange(int a, int b){ //under the assumption that a, b are already in the system
@@ -417,11 +417,18 @@ public:
 };
 
 int main(){
-    bool inited = false;
     string command;
-    Tree *tft;
+    Tree *tft = new Tree();
+    TreeNode *root = new TreeNode();
+    root -> isLeaf = true;
+    tft -> root = root;
+    tft -> firstLeaf = root;
     string buf;
     vector<string> tokens;
+    int a;
+    int b;
+    int c;
+    int d;
     while (1) {
         getline(cin, command);
         stringstream ss(command);
@@ -434,13 +441,80 @@ int main(){
             root -> isLeaf = true;
             tft -> root = root;
             tft -> firstLeaf = root;
-            inited = true;
         }
-        if (inited){
-            
+        if (tokens[0] == "ins"){
+            if (tokens.size() == 5){
+                try {
+                    c = stoi(tokens[1]);
+                    tft -> insert(c, tokens[2], tokens[3], tokens[4]);
+                }
+                catch(exception aiya){
+                    cout << "not valid input\n";
+                }
+            }
         }
+        if (tokens[0] == "find"){
+            if(tokens.size() == 2){
+                try {
+                    d = stoi(tokens[1]);
+                    tft -> find(d);
+                }
+                catch(exception aiya){
+                    cout << "not valid input\n";
+                }
+            }
+        }
+        if (tokens[0] == "range"){
+            if(tokens.size() == 3){
+                try {
+                    a = stoi(tokens[1]);
+                    b = stoi(tokens[2]);
+                    tft -> findRange(a, b);
+                }
+                catch(exception aiya){
+                    cout << "not valid input\n";
+                }
+            }
+        }
+        if (tokens[0] == "gpa"){
+            if(tokens.size() == 2){
+                try {
+                    a = stoi(tokens[1]);
+                    tft -> gpaOne(a);
+                }
+                catch(exception aiya){
+                    cout << "not valid input\n";
+                }
+            }
+            if(tokens.size() == 3){
+                try {
+                    a = stoi(tokens[1]);
+                    b = stoi(tokens[2]);
+                    tft -> gpaAverage(a, b);
+                }
+                catch(exception aiya){
+                    cout << "not valid input\n";
+                }
+            }
+        }
+        if (tokens[0] == "del"){
+            if(tokens.size() == 3){
+                try {
+                    b = stoi(tokens[1]);
+                    tft -> del(b, tokens[2]);
+                }
+                catch(exception aiya){
+                    cout << "not valid input\n";
+                }
+            }
+        }
+        
         tokens.clear();
     }
+    
+    
+    
+//testing part!!!!!!!!!!!!!
     
     
 //    Tree *tft = new Tree();
