@@ -2,6 +2,7 @@
 #include <queue>
 #include <list>
 #include <algorithm>
+#include <sstream>
 using namespace std;
 
 string grades[13] = {"A", "B", "C", "D","A+", "B+", "C+", "D+", "A-", "B-", "C-", "D-","NP"};
@@ -416,30 +417,56 @@ public:
 };
 
 int main(){
-    Tree *tft = new Tree();
-    TreeNode *root = new TreeNode();
-    root -> isLeaf = true;
-    tft -> root = root;
-    tft -> firstLeaf = root;
-    tft -> insert(30, "cs111", "computerOh","A+");
-    tft -> insert(30, "cs110", "computerAh","A+");
-    tft -> insert(40, "cs111", "computerOh","A+");
-    tft -> insert(50, "cs1", "computerAh","A+");
-    tft -> insert(90, "cs121", "computerOh","A+");
-    tft -> insert(31, "cs14", "computerAh","A+"); //something went wrong here about the records!!!
-    tft -> insert(41, "cs1", "computerOh","C");
-//    tft -> insert(51, "cs10", "computerAh","B");
-//    tft -> insert(31, "cs1", "computerOh","A+");
-//    tft -> insert(31, "cs10", "computerAh","A+");
-//    tft -> insert(41, "cs3", "computerOh","A+");
-//    tft -> insert(51, "cs60", "computerAh","B");
-    tft -> del(41, "cs1");
-    tft -> del(41, "cs1");
-    tft -> printTree();
-    tft -> find(90);
-//////    tft -> printLeaves();
-////    tft -> findRange(90, 90);
-    tft -> gpaOne(41);
+    bool inited = false;
+    string command;
+    Tree *tft;
+    string buf;
+    vector<string> tokens;
+    while (1) {
+        getline(cin, command);
+        stringstream ss(command);
+        while (ss >> buf){
+            tokens.push_back(buf);
+        }
+        if (command == "init"){
+            tft = new Tree();
+            TreeNode *root = new TreeNode();
+            root -> isLeaf = true;
+            tft -> root = root;
+            tft -> firstLeaf = root;
+            inited = true;
+        }
+        if (inited){
+            
+        }
+        tokens.clear();
+    }
+    
+    
+//    Tree *tft = new Tree();
+//    TreeNode *root = new TreeNode();
+//    root -> isLeaf = true;
+//    tft -> root = root;
+//    tft -> firstLeaf = root;
+//    tft -> insert(30, "cs111", "computerOh","A+");
+//    tft -> insert(30, "cs110", "computerAh","A+");
+//    tft -> insert(40, "cs111", "computerOh","A+");
+//    tft -> insert(50, "cs1", "computerAh","A+");
+//    tft -> insert(90, "cs121", "computerOh","A+");
+//    tft -> insert(31, "cs14", "computerAh","A+"); //something went wrong here about the records!!!
+//    tft -> insert(41, "cs1", "computerOh","C");
+////    tft -> insert(51, "cs10", "computerAh","B");
+////    tft -> insert(31, "cs1", "computerOh","A+");
+////    tft -> insert(31, "cs10", "computerAh","A+");
+////    tft -> insert(41, "cs3", "computerOh","A+");
+////    tft -> insert(51, "cs60", "computerAh","B");
+//    tft -> del(41, "cs1");
+//    tft -> del(41, "cs1");
+//    tft -> printTree();
+//    tft -> find(90);
+////////    tft -> printLeaves();
+//////    tft -> findRange(90, 90);
+//    tft -> gpaOne(41);
 }
 
 
