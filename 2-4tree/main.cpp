@@ -1,8 +1,11 @@
 #include <iostream>
 #include <queue>
 #include <list>
+#include <algorithm>
 using namespace std;
 
+string grades[13] = {"A", "B", "C", "D","A+", "B+", "C+", "D+", "A-", "B-", "C-", "D-","NP"};
+float points[13]= {4, 3, 2, 1, 4.3, 3.3, 2.3, 1.3, 3.7, 2.7, 1.7, 0.7, 0};
 struct courseRecord{
     char *courseID;
     char *courseName;
@@ -11,10 +14,47 @@ struct courseRecord{
 
 class studentRecord{
 public:
-    list<courseRecord*> courseList;
+    list<courseRecord*> *courseList = new list<courseRecord*>(); //pointer to a list of pointers
     void printRecord(){
-        for (courseRecord* r : courseList){
+        for (courseRecord* r : *courseList){
             cout << r->courseID << r->courseName << r->grade << endl;
+        }
+    }
+    
+    float getGPA(){
+        int courseNumber = courseList -> size();
+        float gpa = 0;
+        for (courseRecord* r : *courseList){
+            char* grade = r -> grade;
+            int index = distance(grades, find(grades, grades + 13, grade));
+            if (index < 0 or index > 12){
+                index = 12;
+            }
+            gpa += points[index] / courseNumber;
+        }
+        return gpa;
+    }
+    void deleteCourse(char* cID){
+        list<courseRecord*>::iterator it;
+        it = courseList -> begin();
+        if ((*it) != NULL){
+            int courseNumber = courseList -> size();
+            int cc = 1;
+            while ((*it)->courseID != cID and cc < courseNumber){
+                ++it;
+                cc ++;
+                cout << "yo\n";
+            }
+            if ((*it)->courseID == cID){
+                courseList -> erase(it);
+                cout << "deleted!\n" << endl;
+            }
+            else{
+                cout << "this course is not in the record." <<endl;
+            }
+        }
+        else{
+            cout << "this course is not in the record." <<endl;
         }
     }
 };
@@ -224,7 +264,7 @@ public:
         courseRecord *r = new courseRecord;
         *r = {courseID, courseName, grade};
         if (s.x != NULL){ //key already in the tree
-            s.x -> records[s.i] -> courseList.push_back(r);
+            s.x -> records[s.i] -> courseList -> push_back(r);
         }
         else { //when the key is not in the tree
             int i = root -> n;
@@ -255,7 +295,7 @@ public:
             s = root -> search(k); //after inserting, searching position
             studentRecord *nrecord = new studentRecord();
             s.x -> records[s.i] = nrecord;
-            nrecord -> courseList.push_back(r);
+            nrecord -> courseList -> push_back(r);
         }
     }
     
@@ -271,6 +311,70 @@ public:
         }
     }
     
+    void del(int k, char* cID){
+        TreeNode::searchReturn s = root -> search(k);
+        if (s.x == NULL){
+            cout << "this student is not in the database\n";
+        }
+        else{
+            studentRecord *r = s.x -> records[s.i];
+            r -> deleteCourse(cID);
+        }
+    }
+    
+    void gpaOne (int k){
+        TreeNode::searchReturn s = root -> search(k);
+        cout << "gpa of student "<< k << endl;
+        if (s.x == NULL){
+            cout << "this student is not in the database\n";
+        }
+        else{
+            studentRecord *r = s.x -> records[s.i];
+            cout << "gpa: "<< r->getGPA()<< endl;
+        }
+    }
+    
+    void gpaAverage (int a, int b){
+        if (b < a){
+            int c = b;
+            b = a;
+            a = c;
+        }
+        TreeNode::searchReturn sa = root -> search(a);
+        TreeNode::searchReturn sb = root -> search(b);
+        int studentNumber = 0;
+        float totalGPA = 0;
+        if (sa.x == NULL or sb.x == NULL){
+            cout << "range invalid, enter existing student IDs\n";
+        }
+        else{
+            TreeNode *currentX = sa.x;
+            int currentI = sa.i;
+            while (currentX != sb.x){ //print everything until the tree node b
+                for (currentI; currentI <= currentX -> n; currentI ++){
+                    studentNumber += 1;
+                    totalGPA += currentX -> records[currentI] -> getGPA();
+                }
+                currentX = currentX -> childs[0];
+                currentI = 0;
+            }
+            //printing students in treenode that contains b
+            if (sa.x == sb.x){
+                for (int i = sa.i; i <= sb.i; i++){
+                    studentNumber += 1;
+                    totalGPA += currentX -> records[i] -> getGPA();
+                }
+            }
+            else{
+                for (int i = 0; i <= sb.i; i++){
+                    studentNumber += 1;
+                    totalGPA += currentX -> records[i] -> getGPA();
+                }
+            }
+            float averageGPA = totalGPA / studentNumber;
+            cout << "the average gpa in the range from" << a <<"to "<<b<<" is "<<averageGPA<<endl;
+        }
+    }
     void findRange(int a, int b){ //under the assumption that a, b are already in the system
         if (b < a){
             int c = b;
@@ -323,19 +427,23 @@ int main(){
     tft -> insert(50, "cs1", "computerAh","A+");
     tft -> insert(90, "cs121", "computerOh","A+");
     tft -> insert(31, "cs14", "computerAh","A+"); //something went wrong here about the records!!!
-    tft -> insert(41, "cs1", "computerOh","A+");
-    tft -> insert(51, "cs10", "computerAh","A+");
-    tft -> insert(31, "cs1", "computerOh","A+");
-    tft -> insert(31, "cs10", "computerAh","A+");
-    tft -> insert(41, "cs3", "computerOh","A+");
-    tft -> insert(51, "cs60", "computerAh","A+");
+    tft -> insert(41, "cs1", "computerOh","C");
+//    tft -> insert(51, "cs10", "computerAh","B");
+//    tft -> insert(31, "cs1", "computerOh","A+");
+//    tft -> insert(31, "cs10", "computerAh","A+");
+//    tft -> insert(41, "cs3", "computerOh","A+");
+//    tft -> insert(51, "cs60", "computerAh","B");
+    tft -> del(41, "cs1");
+    tft -> del(41, "cs1");
     tft -> printTree();
-//    tft -> printLeaves();
-    tft -> findRange(90, 90);
+    tft -> find(90);
+//////    tft -> printLeaves();
+////    tft -> findRange(90, 90);
+    tft -> gpaOne(41);
 }
 
 
-
+//if the student doesn't take any course, the gpa is zero
 
 
 
