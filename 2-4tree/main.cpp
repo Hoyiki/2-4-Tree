@@ -84,6 +84,7 @@ public:
         if (isLeaf){
             while (i >= 0 && k < keys[i]){
                 keys[i+1] = keys[i];
+                records[i+1] = records[i];
                 //also need to move the student information here!!!!!
                 i = i-1;
             }
@@ -144,9 +145,11 @@ public:
         if (i<=n && k==keys[i]){
             TreeNode *currentNode = this;
             while (not currentNode -> isLeaf){
-                currentNode = currentNode -> childs[currentNode -> n];
+                i = currentNode -> n;
+                currentNode = currentNode -> childs[i];
             }
-            searchReturn find = {this, i};
+            i = currentNode -> n;
+            searchReturn find = {currentNode, i};
             return find;
         }
         if (isLeaf){
@@ -191,7 +194,10 @@ public:
                 TreeNode* currentNode = currentLayer.front();
                 currentNode -> printNode();
                 if (currentNode -> isLeaf){
-                    
+                    for (int w=0; w<=currentNode->n; w++){
+                        currentNode -> records[w] -> printRecord();
+                        cout << "--\n";
+                    }
                 }
                 currentLayer.pop();
                 for (int k=0; k<=currentNode->n; k++){
@@ -250,6 +256,49 @@ public:
             nrecord -> courseList.push_back(r);
         }
     }
+    
+    void find(int k){ //according to student ID k, print information about the student
+        TreeNode::searchReturn s = root -> search(k);
+        cout << "printing information about student "<< k << endl;
+        if (s.x == NULL){
+            cout << "this student is not in the database\n";
+        }
+        else{
+            studentRecord *r = s.x -> records[s.i];
+            r -> printRecord();
+        }
+    }
+    
+    void findRange(int a, int b){ //under the assumption that a, b are already in the system
+        if (b < a){
+            int c = b;
+            b = a;
+            a = c;
+        }
+        TreeNode::searchReturn sa = root -> search(a);
+        TreeNode::searchReturn sb = root -> search(b);
+        if (sa.x == NULL or sb.x == NULL){
+            cout << "range invalid, enter existing student IDs\n";
+        }
+        else{
+            TreeNode *currentX = sa.x;
+            int currentI = sa.i;
+            while (currentX != sb.x){ //print everything until the tree node b
+                for (currentI; currentI <= currentX -> n; currentI ++){
+                    cout << "printing information about student " << currentX -> keys[currentI] << endl;
+                    currentX -> records[currentI] -> printRecord();
+                    cout << "\n";
+                }
+                currentX = currentX -> childs[0];
+                currentI = 0;
+            }
+            //printing students in treenode that contains b
+            for (int i = 0; i <= sb.i; i++){
+                cout << "printing information about student " << currentX -> keys[i] << endl;
+                currentX -> records[i] -> printRecord();
+            }
+        }
+    }
 };
 
 int main(){
@@ -258,11 +307,21 @@ int main(){
     root -> isLeaf = true;
     tft -> root = root;
     tft -> firstLeaf = root;
-//    tft -> insert(30);
-
-
+    tft -> insert(30, "cs111", "computerOh","A+");
+    tft -> insert(30, "cs110", "computerAh","A+");
+    tft -> insert(40, "cs111", "computerOh","A+");
+    tft -> insert(50, "cs1", "computerAh","A+");
+    tft -> insert(90, "cs121", "computerOh","A+");
+    tft -> insert(31, "cs14", "computerAh","A+");
+//    tft -> insert(41, "cs1", "computerOh","A+");
+//    tft -> insert(51, "cs10", "computerAh","A+");
+//    tft -> insert(31, "cs1", "computerOh","A+");
+//    tft -> insert(31, "cs10", "computerAh","A+");
+//    tft -> insert(41, "cs3", "computerOh","A+");
+//    tft -> insert(51, "cs60", "computerAh","A+");
     tft -> printTree();
-    tft -> printLeaves();
+//    tft -> printLeaves();
+    tft -> findRange(30, 90);
 }
 
 
