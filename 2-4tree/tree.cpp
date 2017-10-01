@@ -7,6 +7,7 @@
 //
 
 #include "tree.hpp"
+using namespace std;
 
 typedef function<bool(pair<string, int>, pair<string, int>)> Comparator;
 Comparator compFunctor = [](pair<string, int> elem1 ,pair<string, int> elem2){
@@ -128,7 +129,9 @@ void Tree :: popularCourses (int k){ //the the k most popular courses
 void Tree :: insert(int k, string courseID, string courseName, string grade){
     TreeNode::searchReturn s = root -> search(k);
     courseRecord *r = new courseRecord;
-    *r = {courseID, courseName, grade};
+    r -> courseID = courseID;
+    r -> courseName = courseName;
+    r -> grade = grade;
     if (s.x != NULL){ //key already in the tree
         s.x -> records[s.i] -> courseList -> push_back(r);
     }

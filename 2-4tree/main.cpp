@@ -26,8 +26,13 @@ int main(){
     while (1) {
         getline(cin, command);
         stringstream ss(command);
+        bool pushed = false;
         while (ss >> buf){
             tokens.push_back(buf);
+            pushed = true;
+        }
+        if (not pushed){
+            tokens.push_back("");
         }
         if (command == "init"){
             delete tft;

@@ -14,6 +14,12 @@
 #include <map>
 #include <queue>
 #include <set>
+#include <algorithm>
+#include <sstream>
+#include <functional>
+#include <fstream>
+#include <new>
+using namespace std;
 
 class Tree
 {
