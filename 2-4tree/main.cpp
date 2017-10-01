@@ -5,6 +5,9 @@
 #include <sstream>
 #include <string>
 #include <map>
+#include <functional>
+#include <set>
+#include <fstream>
 using namespace std;
 
 string grades[13] = {"A", "B", "C", "D","A+", "B+", "C+", "D+", "A-", "B-", "C-", "D-","NP"};
@@ -15,12 +18,19 @@ struct courseRecord{
     string grade;
 };
 
+typedef function<bool(pair<string, int>, pair<string, int>)> Comparator;
+Comparator compFunctor =
+[](pair<string, int> elem1 ,pair<string, int> elem2)
+{
+				return elem1.second > elem2.second;
+};
+
 class studentRecord{
 public:
     list<courseRecord*> *courseList = new list<courseRecord*>(); //pointer to a list of pointers
     void printRecord(){
         for (courseRecord* r : *courseList){
-            cout << r->courseID << r->courseName << r->grade << endl;
+            cout << " " << r->courseID << " " << r->courseName << " " << r->grade << endl;
         }
     }
     
@@ -212,6 +222,31 @@ public:
         cout << "--\n";
     }
     
+    bool verifyNode(){
+        bool vn = true;
+        for (int i=0; i<=n-1; i++){
+            if (keys[i] >= keys[i+1]){
+                vn = false;
+            }
+        }
+        return vn;
+    }
+    bool verifyChild(){
+        bool vc = true;
+        if (isLeaf){
+            return true;
+        }
+        for (int i=0; i<=n; i++){
+            if (keys[i] != childs[i] -> keys[childs[i]->n]){
+                vc = false;
+            }
+            if (not childs[i]->verifyChild()){
+                vc = false;
+            }
+        }
+        return vc;
+    }
+    
 private:
     
 };
@@ -233,7 +268,7 @@ public:
         currentLayer.push(root);
         for (int i=1; i <= layers; i++){
             cout << "######\n";
-            long nodesNumber = currentLayer.size(); //implicit data type of size() is long
+            int nodesNumber = currentLayer.size(); //implicit data type of size() is long
             for (int j=1; j<=nodesNumber; j++){
                 TreeNode* currentNode = currentLayer.front();
                 currentNode -> printNode();
@@ -251,6 +286,37 @@ public:
         }
     }
     
+    void verify(){
+        bool v = true;
+        int tempK;
+        //first to verify all the leaves
+        TreeNode* currentNode = firstLeaf;
+        while (currentNode -> childs[0] != NULL) {
+            if (not currentNode -> verifyNode()){
+                v = false;
+            }
+            tempK = currentNode -> keys[currentNode->n];
+            currentNode = currentNode -> childs[0];
+            if (tempK >= currentNode->keys[0]){
+                v = false;
+            }
+        }
+        if (not currentNode -> verifyNode()){
+            v = false;
+        }
+        //then check if all the parent node are the largest value of the child node
+        if (not root -> verifyChild()){
+            v = false;
+        }
+        if (v){
+            cout << "verified :D \n";
+        }
+        else{
+            cout << "not verified :(\n";
+        }
+        
+    }
+    
     void printLeaves(){
         cout << "printing leaves...\n";
         TreeNode* currentNode = firstLeaf;
@@ -259,6 +325,46 @@ public:
             currentNode = currentNode -> childs[0];
         }
         currentNode -> printNode();
+    }
+    
+    void popularCourses (int k){ //the the k most popular courses
+        map<string, int> m;
+        TreeNode* currentNode = firstLeaf;
+        while (currentNode -> childs[0] != NULL) {
+            for (int i=0; i<=currentNode->n; i++){
+                for (courseRecord* r : *(currentNode -> records[i] -> courseList)){
+                    if (m.count(r->courseName) == 0){
+                        m.insert(make_pair(r->courseName, 1));
+                    }
+                    else{
+                        m[r->courseName] += 1;
+                    }
+                }
+            }
+            currentNode = currentNode -> childs[0];
+        }
+        for (int i=0; i<=currentNode->n; i++){
+            for (courseRecord* r : *(currentNode -> records[i] -> courseList)){
+                if (m.count(r->courseName) == 0){
+                    m.insert(make_pair(r->courseName, 1));
+                }
+                else{
+                    m[r->courseName] += 1;
+                }
+            }
+        }
+        set<pair<string, int>, Comparator> mSet(m.begin(), m.end(), compFunctor);
+        int counter = 1;
+        for (pair<string, int> element : mSet){
+            if (counter <= k){
+                cout << element.first << " taken by " << element.second <<" students"<< endl;
+            }
+            else{
+                break;
+            }
+            counter ++;
+        }
+        //m has all the records
     }
     
     void insert(int k, string courseID, string courseName, string grade){
@@ -429,6 +535,7 @@ int main(){
     int b;
     int c;
     int d;
+    string filename;
     while (1) {
         getline(cin, command);
         stringstream ss(command);
@@ -509,6 +616,125 @@ int main(){
             }
         }
         
+        if (tokens[0] == "top"){
+            if(tokens.size() == 2){
+                try {
+                    b = stoi(tokens[1]);
+                    tft -> popularCourses(b);
+                }
+                catch(exception aiya){
+                    cout << "not valid input\n";
+                }
+            }
+        }
+        
+        if (tokens[0] == "verify"){
+            tft -> verify();
+        }
+        
+        if (tokens[0] == "load"){
+            filename = tokens[1];
+            ifstream input(filename);
+            string line;
+            while (getline(input, line)){
+                command = line;
+                stringstream ss(command);
+                while (ss >> buf){
+                    tokens.push_back(buf);
+                }
+                if (command == "init"){
+                    tft = new Tree();
+                    TreeNode *root = new TreeNode();
+                    root -> isLeaf = true;
+                    tft -> root = root;
+                    tft -> firstLeaf = root;
+                }
+                if (tokens[0] == "ins"){
+                    if (tokens.size() == 5){
+                        try {
+                            c = stoi(tokens[1]);
+                            tft -> insert(c, tokens[2], tokens[3], tokens[4]);
+                        }
+                        catch(exception aiya){
+                            cout << "not valid input\n";
+                        }
+                    }
+                }
+                if (tokens[0] == "find"){
+                    if(tokens.size() == 2){
+                        try {
+                            d = stoi(tokens[1]);
+                            tft -> find(d);
+                        }
+                        catch(exception aiya){
+                            cout << "not valid input\n";
+                        }
+                    }
+                }
+                if (tokens[0] == "range"){
+                    if(tokens.size() == 3){
+                        try {
+                            a = stoi(tokens[1]);
+                            b = stoi(tokens[2]);
+                            tft -> findRange(a, b);
+                        }
+                        catch(exception aiya){
+                            cout << "not valid input\n";
+                        }
+                    }
+                }
+                if (tokens[0] == "gpa"){
+                    if(tokens.size() == 2){
+                        try {
+                            a = stoi(tokens[1]);
+                            tft -> gpaOne(a);
+                        }
+                        catch(exception aiya){
+                            cout << "not valid input\n";
+                        }
+                    }
+                    if(tokens.size() == 3){
+                        try {
+                            a = stoi(tokens[1]);
+                            b = stoi(tokens[2]);
+                            tft -> gpaAverage(a, b);
+                        }
+                        catch(exception aiya){
+                            cout << "not valid input\n";
+                        }
+                    }
+                }
+                if (tokens[0] == "del"){
+                    if(tokens.size() == 3){
+                        try {
+                            b = stoi(tokens[1]);
+                            tft -> del(b, tokens[2]);
+                        }
+                        catch(exception aiya){
+                            cout << "not valid input\n";
+                        }
+                    }
+                }
+                
+                if (tokens[0] == "top"){
+                    if(tokens.size() == 2){
+                        try {
+                            b = stoi(tokens[1]);
+                            tft -> popularCourses(b);
+                        }
+                        catch(exception aiya){
+                            cout << "not valid input\n";
+                        }
+                    }
+                }
+                
+                if (tokens[0] == "verify"){
+                    tft -> verify();
+                }
+                
+                tokens.clear();
+            }
+        }
         tokens.clear();
     }
     
