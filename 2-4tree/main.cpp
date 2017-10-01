@@ -29,8 +29,13 @@ class studentRecord{
 public:
     list<courseRecord*> *courseList = new list<courseRecord*>(); //pointer to a list of pointers
     ~studentRecord (){
-        for (auto&& r: *courseList){
-            delete r;
+        list<courseRecord*>::iterator it;
+        if (courseList -> size() > 0){
+            it = courseList -> begin();
+            for (int i=0; i<courseList->size();i++){
+                delete *it;
+                ++it;
+            }
         }
         delete courseList;
     }
@@ -96,7 +101,14 @@ public:
     }
     //destructor
     ~TreeNode(){
-        
+        for (int i=0; i<=n; i++){
+            if (isLeaf){
+                delete records[i];
+            }
+            else{
+                delete childs[i];
+            }
+        }
     }
     
     //split the ith node's child on this node, under the condition that this node is not full
@@ -259,13 +271,15 @@ private:
     
 };
 
-
 class Tree
 {
 public:
     Tree() {
         layers = 1;
     };
+    ~Tree(){
+        delete root;
+    }
     TreeNode *root;
     TreeNode *firstLeaf;
     int layers;
@@ -551,6 +565,7 @@ int main(){
             tokens.push_back(buf);
         }
         if (command == "init"){
+            delete tft;
             tft = new Tree();
             TreeNode *root = new TreeNode();
             root -> isLeaf = true;
@@ -645,6 +660,7 @@ int main(){
         }
         
         if (tokens[0] == "exit"){
+            delete tft;
             return(0);
         }
         
