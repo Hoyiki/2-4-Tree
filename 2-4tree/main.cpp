@@ -8,10 +8,12 @@
 #include <functional>
 #include <set>
 #include <fstream>
+#include <new>
 using namespace std;
 
 string grades[13] = {"A", "B", "C", "D","A+", "B+", "C+", "D+", "A-", "B-", "C-", "D-","NP"};
 float points[13]= {4, 3, 2, 1, 4.3, 3.3, 2.3, 1.3, 3.7, 2.7, 1.7, 0.7, 0};
+
 struct courseRecord{
     string courseID;
     string courseName;
@@ -19,21 +21,24 @@ struct courseRecord{
 };
 
 typedef function<bool(pair<string, int>, pair<string, int>)> Comparator;
-Comparator compFunctor =
-[](pair<string, int> elem1 ,pair<string, int> elem2)
-{
-				return elem1.second > elem2.second;
+Comparator compFunctor = [](pair<string, int> elem1 ,pair<string, int> elem2){
+    return elem1.second > elem2.second;
 };
 
 class studentRecord{
 public:
     list<courseRecord*> *courseList = new list<courseRecord*>(); //pointer to a list of pointers
+    ~studentRecord (){
+        for (auto&& r: *courseList){
+            delete r;
+        }
+        delete courseList;
+    }
     void printRecord(){
         for (courseRecord* r : *courseList){
             cout << " " << r->courseID << " " << r->courseName << " " << r->grade << endl;
         }
     }
-    
     float getGPA(){
         int courseNumber = courseList -> size();
         float gpa = 0;
@@ -89,7 +94,10 @@ public:
     TreeNode(){
         n = -1;
     }
-    
+    //destructor
+    ~TreeNode(){
+        
+    }
     
     //split the ith node's child on this node, under the condition that this node is not full
     //usually split when the child node has 4 keys (0,1,2,3)
@@ -560,6 +568,10 @@ int main(){
                 }
             }
         }
+        //this is for debugging purpose mainly
+        if (tokens[0] == "print"){
+            tft -> printTree();
+        }
         if (tokens[0] == "find"){
             if(tokens.size() == 2){
                 try {
@@ -630,6 +642,10 @@ int main(){
         
         if (tokens[0] == "verify"){
             tft -> verify();
+        }
+        
+        if (tokens[0] == "exit"){
+            return(0);
         }
         
         if (tokens[0] == "load"){
@@ -731,13 +747,12 @@ int main(){
                 if (tokens[0] == "verify"){
                     tft -> verify();
                 }
-                
                 tokens.clear();
             }
         }
         tokens.clear();
     }
-    
+}
     
     
 //testing part!!!!!!!!!!!!!
@@ -767,10 +782,11 @@ int main(){
 ////////    tft -> printLeaves();
 //////    tft -> findRange(90, 90);
 //    tft -> gpaOne(41);
-}
 
 
-//if the student doesn't take any course, the gpa is zero
+//if the student doesn't take any course, the gpa is zero / maybe should just ignore the student??
+//no load/exit in load
+//if format incorrect, just ignore it
 
 
 
